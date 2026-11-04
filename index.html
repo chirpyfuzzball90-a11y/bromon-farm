@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bro-Mon Smart Farming Hub</title>
+    <style>
+        body {
+            background-color: #121212;
+            color: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            text-align: center;
+            background: #1e1e1e;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+            border: 1px solid #333;
+        }
+        h1 { margin-bottom: 5px; color: #f1c40f; }
+        p { color: #aaa; font-size: 14px; margin-bottom: 25px; }
+        .btn {
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: background 0.2s;
+            width: 100%;
+        }
+        .btn.paused { background: #c0392b; }
+        .timer-box {
+            font-size: 24px;
+            margin-top: 15px;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Bro-Mon Farm Tab</h1>
+        <p>This page reloads safely. It halts instantly if a monster pops up.</p>
+        
+        <button id="toggle-btn" class="btn">Auto-Reload: ACTIVE</button>
+        <div id="timer" class="timer-box">Next Scan: 10s</div>
+    </div>
+
+    <script>
+        let timeLeft = 10;
+        let isPaused = false;
+        let countdownInterval;
+
+        const toggleBtn = document.getElementById('toggle-btn');
+        const timerDisplay = document.getElementById('timer');
+
+        // Senses if Bro-Mon elements are actively rendered inside the DOM
+        function scanForBroMon() {
+            // Checks for Bro-Mon tags, images, components or matching containers
+            const monster = document.querySelector('bro-mon, [id*="bromon"], [class*="bromon"], img[src*="bro-mon"], div[class*="monster"]');
+            
+            if (monster) {
+                isPaused = true;
+                toggleBtn.innerText = "🚨 Bro-Mon DETECTED! 🚨";
+                toggleBtn.classList.add('paused');
+                timerDisplay.innerText = "Safety Lock On. Reload blocked!";
+                return true;
+            }
+            return false;
+        }
+
+        function startTimer() {
+            countdownInterval = setInterval(() => {
+                // Double check page states before deducting seconds
+                if (scanForBroMon()) {
+                    clearInterval(countdownInterval);
+                    return;
+                }
+
+                if (!isPaused) {
+                    timeLeft--;
+                    timerDisplay.innerText = `Next Scan: ${timeLeft}s`;
+
+                    if (timeLeft <= 0) {
+                        clearInterval(countdownInterval);
+                        window.location.reload();
+                    }
+                }
+            }, 1000);
+        }
+
+        toggleBtn.addEventListener('click', () => {
+            isPaused = !isPaused;
+            if (isPaused) {
+                toggleBtn.innerText = "Auto-Reload: PAUSED";
+                toggleBtn.classList.add('paused');
+                timerDisplay.innerText = "Timer stopped.";
+            } else {
+                toggleBtn.innerText = "Auto-Reload: ACTIVE";
+                toggleBtn.classList.remove('paused');
+                timeLeft = 10;
+                timerDisplay.innerText = `Next Scan: ${timeLeft}s`;
+            }
+        });
+
+        // Initialize checking script immediately
+        startTimer();
+    </script>
+</body>
+</html>
